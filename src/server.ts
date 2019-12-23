@@ -28,7 +28,7 @@ export default class AppServer implements AppService
                 console.log("Inputting value into the current program");
             }
         });
-        subscriber.subscribe("upload-program");
+        subscriber.subscribe(["upload-program", "input-value"]);
         console.log("The app is ready to accept programs");
     }
 }
