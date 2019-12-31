@@ -1,10 +1,11 @@
 import { AppService, Command, CommandType } from "./models";
 import AppConfig from "./config";
 import redis from 'redis'
+import { ProgramExecutor } from "./programExecutor";
 
 export default class AppServer implements AppService
 {
-    constructor(private appConfig: AppConfig)
+    constructor(private appConfig: AppConfig, private programExecutor: ProgramExecutor)
     {
     }
     start(): void {
@@ -21,6 +22,7 @@ export default class AppServer implements AppService
             {
                 //Reload the currently stored program
                 console.log("Reloading current program");
+                this.programExecutor.load(command.data.nodes);
                 publisher.publish("receive-results", "Program ready");
             }
             else if(command.type == CommandType.InputValue)
