@@ -28,7 +28,7 @@ jobs:
 
       - name: Run tests
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" >> .env.production.yml
+          echo "${{ secrets.PROD_ENV }}" >> .env.production.yml
           if [ -f docker-compose.test.yml ]; then
             docker-compose --file docker-compose.test.yml build
             docker-compose --file docker-compose.test.yml run sut
