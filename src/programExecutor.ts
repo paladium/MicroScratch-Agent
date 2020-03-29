@@ -30,17 +30,18 @@ export interface ProgramTreeOutput extends ProgramTreeNode
 }
 
 const operations = {
-    "+": (...args: Array<number>): number => {
-        return args.reduce((a, b) => a + b);
+    "+": (...args: Array<string>): number => {
+        console.log(args);
+        return args.map((item) => Number.parseInt(item)).reduce((a, b) => a + b, 0);
     },
-    "-": (...args: Array<number>): number => {
-        return args.reduce((a, b) => a - b);
+    "-": (...args: Array<string>): number => {
+        return args.map((item) => Number.parseInt(item)).reduce((a, b) => a - b);
     },
-    "*": (...args: Array<number>): number => {
-        return args.reduce((a, b) => a * b);
+    "*": (...args: Array<string>): number => {
+        return args.map((item) => Number.parseInt(item)).reduce((a, b) => a * b);
     },
-    "/": (...args: Array<number>): number => {
-        return args.reduce((a, b) => a / b);
+    "/": (...args: Array<string>): number => {
+        return args.map((item) => Number.parseInt(item)).reduce((a, b) => a / b);
     }
 };
 
@@ -79,13 +80,13 @@ export class ProgramExecutor
                 let argumentsIndexes: Array<number> = [];
                 args.forEach((key) => {
                     const input = node.inputs[key];
-                    argumentsIndexes.push(input.connections.node);
+                    argumentsIndexes.push(input.connections[0].node);
                 });
                 const index = this.programTree.push(<ProgramTreeFunc>{
                     type: ProgramTreeType.Func,
                     argumentsIndexes: argumentsIndexes,
                     func: operations[operator]
-                });
+                }) - 1;
                 functions.set(Number.parseInt(key), index);
             }
             else if(node.name == "printer")
@@ -119,7 +120,8 @@ export class ProgramExecutor
         let data = null;
         if(instruction.type == ProgramTreeType.Input)
         {
-            //Ask for input and save the value into the variable, pass the current instruction 
+            //Ask for input and save the value into the variable, pass the current instruction
+            data = this.programCounter;
         }
         else if(instruction.type == ProgramTreeType.Func)
         {
@@ -130,7 +132,9 @@ export class ProgramExecutor
             func.argumentsIndexes.forEach((index) => {
                 args.push((this.programTree[index] as ProgramTreeInput).value);
             });
-            const result = func.func(args);
+            const result = func.func(...args);
+            console.log(func.func);
+            console.log("The calculated result is ", result);
             func.result = result;
             //After that return back that the function was executed
         }
@@ -146,10 +150,11 @@ export class ProgramExecutor
         return {type: instruction.type, data: data};
     }
     //The data will contain the current programCounter and the value
-    public input(value: any)
+    public input(data: {counter: number, value: any})
     {
-        const instruction = this.currentInstruction as ProgramTreeInput;
-        instruction.value = value;
+        const instruction = this.programTree[data.counter] as ProgramTreeInput;
+        instruction.value = data.value;
+        console.log("The current tree is", this.programTree);
     }
     get currentInstruction()
     {
